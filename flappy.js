@@ -36,10 +36,44 @@ function PairOfBarriers(height,opening,x)
         this.inferior.setHeight(inferiorHeight)
     }
 
-    this.getX = () => parseInt(this.element.style.split('px')[0])
-    this.setX = () => this.element.style.left = `${x}px`
+    this.getX = () => parseInt(this.element.style.left.split('px')[0])
+    this.setX = x => this.element.style.left = `${x}px`
     this.getWidth = () => this.element.clientWidth
 
     this.sortOpening()
     this.setX(x)
 }
+
+function Barriers(height,width,opening,espace,notificationDot)
+{
+    this.pairs =
+        [
+            new PairOfBarriers(height,opening,width),
+            new PairOfBarriers(height,opening,width + espace),
+            new PairOfBarriers(height,opening,width + espace * 2),
+            new PairOfBarriers(height,opening,width + espace * 3),
+        ]
+
+    const displacement = 3
+
+    this.animation = () =>
+    {
+        this.pairs.forEach(par =>
+        {
+            par.setX(par.getX() - displacement)
+            //When element go out screen
+            if(par.getX() < -par.getWidth())
+            {
+                par.setX(par.getX() + espace * this.pairs.length)
+                par.sortOpening()
+            }
+
+            const middle = width / 2
+            const passMiddle = par.getX() + displacement >= middle
+            &&par.getX()<middle
+            // if(passMiddle) notificationDot()
+            passMiddle && notificationDot()
+        })
+    }
+}
+
