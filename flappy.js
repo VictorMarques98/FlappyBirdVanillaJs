@@ -110,18 +110,6 @@ function Bird(GameHeight)
     this.setY(GameHeight / 2)
 }
 
-// const barriers = new Barriers(700,1200,200,400)
-// const bird = new Bird(700)
-// const gameArea = document.querySelector('[flappy]')
-//
-// gameArea.appendChild(bird.element)
-// barriers.pairs.forEach(par => gameArea.appendChild(par.element))
-// setInterval(() =>
-// {
-//     barriers.animation()
-//     bird.animation()
-// },20)
-
 function progress()
 {
     this.element = newElement('span','progress')
@@ -132,6 +120,33 @@ function progress()
     this.refreshScore(0)
 }
 
+function overflow(ele1,ele2)
+{
+    const a = ele1.getBoundingClientRect()
+    const b = ele2.getBoundingClientRect()
+
+    const horizon = a.left + a.width >= b.left
+    && b.left + b.width >= a.left
+    const vertical = a.top + a.height >= b.top
+    && b.top + b.height >= a.top
+    return horizon && vertical
+}
+
+function crash(bird,barriers)
+{
+    let crash = false
+    barriers.pairs.forEach(pairBarriers =>
+    {
+        if(!crash)
+        {
+            const superior = pairBarriers.superior.element
+            const inferior = pairBarriers.inferior.element
+            crash = overflow(bird.element,superior)
+            || overflow(bird.element,inferior)
+        }
+    })
+    return crash
+}
 function flappyGame()
 {
     let scores = 0;
@@ -140,6 +155,10 @@ function flappyGame()
     const height = areaGame.clientHeight
     const width = areaGame.clientWidth
 
+    const owner = document.createElement('div')
+    owner.innerHTML = 'Created By Victor Marques'
+    owner.classList.add('owner')
+
     const Progress = new progress()
     const barriers = new Barriers(height,width,200,400,
         () => Progress.refreshScore(++scores))
@@ -147,6 +166,7 @@ function flappyGame()
 
     areaGame.appendChild(Progress.element)
     areaGame.appendChild(bird.element)
+    areaGame.appendChild(owner)
     barriers.pairs.forEach(pair => areaGame.appendChild(pair.element))
 
     this.start = () =>
@@ -156,6 +176,16 @@ function flappyGame()
         {
             barriers.animation()
             bird.animation()
+
+            if(crash(bird,barriers))
+            {
+                clearInterval(temporizer)
+                const areaGame = document.querySelector('[flappy]')
+                const end = document.createElement('div')
+                end.classList.add('end')
+                end.innerHTML = 'END GAME'
+                areaGame.appendChild(end)
+            }
         },20)
     }
 }
