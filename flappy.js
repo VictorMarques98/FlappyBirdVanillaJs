@@ -110,14 +110,54 @@ function Bird(GameHeight)
     this.setY(GameHeight / 2)
 }
 
-const barriers = new Barriers(700,1200,200,400)
-const bird = new Bird(700)
-const gameArea = document.querySelector('[flappy]')
+// const barriers = new Barriers(700,1200,200,400)
+// const bird = new Bird(700)
+// const gameArea = document.querySelector('[flappy]')
+//
+// gameArea.appendChild(bird.element)
+// barriers.pairs.forEach(par => gameArea.appendChild(par.element))
+// setInterval(() =>
+// {
+//     barriers.animation()
+//     bird.animation()
+// },20)
 
-gameArea.appendChild(bird.element)
-barriers.pairs.forEach(par => gameArea.appendChild(par.element))
-setInterval(() =>
+function progress()
 {
-    barriers.animation()
-    bird.animation()
-},20)
+    this.element = newElement('span','progress')
+    this.refreshScore = scores =>
+    {
+        this.element.innerHTML = scores
+    }
+    this.refreshScore(0)
+}
+
+function flappyGame()
+{
+    let scores = 0;
+
+    const areaGame = document.querySelector('[flappy]')
+    const height = areaGame.clientHeight
+    const width = areaGame.clientWidth
+
+    const Progress = new progress()
+    const barriers = new Barriers(height,width,200,400,
+        () => Progress.refreshScore(++scores))
+    const bird = new Bird(height)
+
+    areaGame.appendChild(Progress.element)
+    areaGame.appendChild(bird.element)
+    barriers.pairs.forEach(pair => areaGame.appendChild(pair.element))
+
+    this.start = () =>
+    {
+        //Game Loop
+        const temporizer = setInterval(() =>
+        {
+            barriers.animation()
+            bird.animation()
+        },20)
+    }
+}
+
+new flappyGame().start()
